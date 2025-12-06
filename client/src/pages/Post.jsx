@@ -44,7 +44,7 @@ const reactionsList = [
 
 const Post = () => {
   const { postId } = useParams();
-  const shareUrl = `https://thinkify.vercel.app/posts/${postId}`;
+  const shareUrl = `https://Postify.vercel.app/posts/${postId}`;
   const {
     setLoadingStatus,
     setAlertBoxOpenStatus,

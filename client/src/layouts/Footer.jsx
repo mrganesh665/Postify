@@ -24,7 +24,7 @@ const Footer = () => {
         <Grid container>
           <Grid item>
             <Box sx={{ display: "flex", gap: "10px", alignItems: "center" }}>
-              <img src="./images/favicon.ico" width="55" alt="Thinkify" />
+              <img src="./images/favicon.ico" width="55" alt="Postify" />
               <Typography
                 sx={{
                   fontFamily: "Platypi",
@@ -33,7 +33,7 @@ const Footer = () => {
                 variant="h3"
                 component="h3"
               >
-                Thinkify
+                Postify
               </Typography>
             </Box>
             <Typography variant="body1">
@@ -113,7 +113,7 @@ const Footer = () => {
               }}
             >
               <Typography>1-800-600-0464</Typography>
-              <Typography>support@thinkify.com</Typography>
+              <Typography>support@Postify.com</Typography>
               <Typography>900-140 10th Avenue SE</Typography>
               <Typography>Calgary, AB TG 0R1</Typography>
             </Box>

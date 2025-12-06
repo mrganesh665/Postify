@@ -14,7 +14,7 @@ Postify is a vibrant space where people from diverse backgrounds and interests c
 # How to Run
 
 ```
-git clone https://github.com/masum184e/postify.git
+git clone https://github.com/mrganesh665/Postify.git
 
 # BACKEND
 cd server

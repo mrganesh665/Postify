@@ -13,7 +13,7 @@ export default function NavBar() {
                         <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                             <Link to="/" style={{ textDecoration: 'none', color: 'inherit' }} >
                                 <Box sx={{ display: "flex", justifyContent: "space-between", gap: "10px" }}>
-                                    <img src="./images/favicon.ico" width="55" alt="Thinkify" />
+                                    <img src="./images/favicon.ico" width="55" alt="Postify" />
                                     <Typography
                                         sx={{
                                             fontFamily: "Platypi",
@@ -21,7 +21,7 @@ export default function NavBar() {
                                         }}
                                         variant="h3"
                                         component="h3"
-                                    >Thinkify</Typography>
+                                    >Postify</Typography>
                                 </Box>
                             </Link>
                             <Box >

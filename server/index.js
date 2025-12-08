@@ -18,7 +18,7 @@ app.use(
     cors({
         origin: [
             "http://localhost:5173",
-            "https://postifyc.vercel.app/",
+            "https://postify-tx6o.vercel.app/",
         ],
         credentials: true,
     })

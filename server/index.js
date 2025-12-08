@@ -18,7 +18,7 @@ app.use(
     cors({
         origin: [
             "http://localhost:5173",
-            "https://postify-qr2x.onrender.com/",
+            "https://postify-qr2x.onrender.com",
         ],
         credentials: true,
     })

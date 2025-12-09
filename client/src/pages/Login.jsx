@@ -154,6 +154,7 @@ const Login = () => {
                     color: "white",
                   },
                   "& .MuiInputBase-input": {
+                    color: "white",     
                     "&::placeholder": {
                       color: "white",
                     },
@@ -189,6 +190,7 @@ const Login = () => {
                     color: "white",
                   },
                   "& .MuiInputBase-input": {
+                    color: "white",     
                     "&::placeholder": {
                       color: "white",
                     },

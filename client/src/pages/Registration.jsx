@@ -155,6 +155,7 @@ const Registration = () => {
                     color: "white",
                   },
                   "& .MuiInputBase-input": {
+                    color: "white",     
                     "&::placeholder": {
                       color: "white",
                     },
@@ -188,8 +189,9 @@ const Registration = () => {
                   "& .MuiInputLabel-outlined": {
                     color: "white",
                   },
-                  "& .MuiInputBase-input": {
-                    "&::placeholder": {
+                  "& .MuiInputBase-input": {    
+                   color: "white",       
+                   "&::placeholder": {
                       color: "white",
                     },
                   },
@@ -224,6 +226,7 @@ const Registration = () => {
                     color: "white",
                   },
                   "& .MuiInputBase-input": {
+                    color: "white",     
                     "&::placeholder": {
                       color: "white",
                     },

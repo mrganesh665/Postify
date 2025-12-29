@@ -7,7 +7,7 @@ import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
-import VisibilityIcon from '@mui/icons-material/Visibility';
+import VisibilityIcon from "@mui/icons-material/Visibility";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
@@ -17,8 +17,12 @@ import Cookies from "js-cookie";
 import { Link } from "react-router-dom";
 
 import useThinkify from "../hooks/useThinkify";
+import EditPostModal from "./EditPostModal";
 
 const MyPost = () => {
+const [isEditOpen, setIsEditOpen] = useState(false);
+const [selectedPost, setSelectedPost] = useState(null);
+
   const [data, setData] = useState([]);
   const {
     setLoadingStatus,
@@ -26,6 +30,13 @@ const MyPost = () => {
     setAlertMessage,
     setAlertSeverity,
   } = useThinkify();
+
+const handleEditClick = (post) => {
+  setSelectedPost(post);
+  setIsEditOpen(true);
+};
+
+
   useEffect(() => {
     const fetchData = async () => {
       setLoadingStatus(true);
@@ -72,6 +83,62 @@ const MyPost = () => {
       </Box>
     );
   }
+
+  const handlePostUpdated = (updatedPost) => {
+  setData((prevData) =>
+    prevData.map((post) =>
+      post._id === updatedPost._id ? updatedPost : post
+    )
+  );
+};
+
+
+  const handleEdit = async (postId, updatedPostData) => {
+    try {
+      setLoadingStatus(true);
+
+      const response = await axios.patch(
+        `${import.meta.env.VITE_SERVER_ENDPOINT}/posts/${postId}`,
+        updatedPostData,
+        {
+          headers: {
+            Authorization: `Bearer ${Cookies.get(
+              import.meta.env.VITE_TOKEN_KEY
+            )}`,
+          },
+        }
+      );
+
+      if (response.data?.status) {
+        setData((prevData) =>
+          prevData.map((post) =>
+            post._id === postId
+              ? { ...post, ...(response.data.post || updatedPostData) }
+              : post
+          )
+        );
+
+        setAlertSeverity("success");
+        setAlertMessage(response.data.message || "Post updated successfully");
+      } else {
+        setAlertSeverity("error");
+        setAlertMessage(response.data?.message || "Update failed");
+      }
+    } catch (error) {
+      console.error("Edit post error:", error);
+
+      setAlertSeverity("error");
+      setAlertMessage(
+        error?.response?.data?.message ||
+          error?.message ||
+          "Something went wrong while updating the post"
+      );
+    } finally {
+      setLoadingStatus(false);
+      setAlertBoxOpenStatus(true);
+    }
+  };
+
   const handleDelete = async (postId) => {
     try {
       setLoadingStatus(true);
@@ -109,11 +176,13 @@ const MyPost = () => {
         : setAlertMessage(error.message);
     }
   };
-  const handleVisibility =async(postId)=>{
+  const handleVisibility = async (postId) => {
     try {
       setLoadingStatus(true);
       const response = await axios.patch(
-        `${import.meta.env.VITE_SERVER_ENDPOINT}/posts/change-visibility/${postId}`,
+        `${
+          import.meta.env.VITE_SERVER_ENDPOINT
+        }/posts/change-visibility/${postId}`,
         {},
         {
           headers: {
@@ -127,7 +196,11 @@ const MyPost = () => {
         setData((prevData) =>
           prevData.map((post) =>
             post._id === postId
-              ? { ...post, visibility: post.visibility === "public" ? "private" : "public" }
+              ? {
+                  ...post,
+                  visibility:
+                    post.visibility === "public" ? "private" : "public",
+                }
               : post
           )
         );
@@ -152,7 +225,7 @@ const MyPost = () => {
         ? setAlertMessage(error.response.data.message)
         : setAlertMessage(error.message);
     }
-  }
+  };
   return (
     <Box
       sx={{
@@ -174,13 +247,19 @@ const MyPost = () => {
               <TableCell sx={{ fontWeight: "bold", color: "white" }}>
                 Title
               </TableCell>
-              <TableCell sx={{ fontWeight: "bold", color: "white", textAlign:"center" }}>
+              <TableCell
+                sx={{ fontWeight: "bold", color: "white", textAlign: "center" }}
+              >
                 Reactions
               </TableCell>
-              <TableCell sx={{ fontWeight: "bold", color: "white", textAlign:"center" }}>
+              <TableCell
+                sx={{ fontWeight: "bold", color: "white", textAlign: "center" }}
+              >
                 Comments
               </TableCell>
-              <TableCell sx={{ fontWeight: "bold", color: "white", textAlign:"center" }}>
+              <TableCell
+                sx={{ fontWeight: "bold", color: "white", textAlign: "center" }}
+              >
                 Visibility
               </TableCell>
               <TableCell sx={{ fontWeight: "bold", color: "white" }}>
@@ -200,14 +279,24 @@ const MyPost = () => {
                     {item.title}
                   </Link>
                 </TableCell>
-                <TableCell sx={{ textAlign: "center" }} >
+                <TableCell sx={{ textAlign: "center" }}>
                   {item.reactions.length ? item.reactions.length : "0"}
                 </TableCell>
                 <TableCell sx={{ textAlign: "center" }}>
                   {item.comments.length ? item.comments.length : "0"}
                 </TableCell>
                 <TableCell sx={{ textAlign: "center" }}>
-                  {item.visibility == "private" ? <VisibilityOffIcon sx={{cursor:"pointer"}} onClick={()=>handleVisibility(item._id)} /> : <VisibilityIcon sx={{cursor:"pointer"}} onClick={()=>handleVisibility(item._id)} />}
+                  {item.visibility == "private" ? (
+                    <VisibilityOffIcon
+                      sx={{ cursor: "pointer" }}
+                      onClick={() => handleVisibility(item._id)}
+                    />
+                  ) : (
+                    <VisibilityIcon
+                      sx={{ cursor: "pointer" }}
+                      onClick={() => handleVisibility(item._id)}
+                    />
+                  )}
                 </TableCell>
                 <TableCell>
                   <Box
@@ -221,6 +310,7 @@ const MyPost = () => {
                         fontSize: "30px",
                         cursor: "pointer",
                       }}
+                      onClick={() => handleEditClick(item)}
                     />
                     <DeleteIcon
                       sx={{
@@ -230,7 +320,7 @@ const MyPost = () => {
                         fontSize: "30px",
                         cursor: "pointer",
                       }}
-                      onClick={() => handleDelete(item._id)}
+               onClick={() => handleDelete(item._id)}
                     />
                   </Box>
                 </TableCell>
@@ -239,6 +329,16 @@ const MyPost = () => {
           </TableBody>
         </Table>
       </TableContainer>
+      <EditPostModal
+        open={isEditOpen}
+        post={selectedPost}
+        onClose={() => {
+          setIsEditOpen(false);
+          setSelectedPost(null);
+        }}
+        onSave={handleEdit}
+        onPostUpdated={handlePostUpdated}
+      />
     </Box>
   );
 };

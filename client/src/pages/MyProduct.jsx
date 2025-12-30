@@ -169,7 +169,8 @@ const handleEditProduct = async (productId, formData) => {
                   cursor: "pointer",
                 }}
               >
-                <CardMedia
+                <CardMedia 
+                   sx={{objectFit: "contain", height: 180}}
                   component="img"
                   height="140"
                   image={`${

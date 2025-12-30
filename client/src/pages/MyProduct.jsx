@@ -13,6 +13,7 @@ import axios from "axios";
 import Cookies from "js-cookie";
 import { Link } from "react-router-dom";
 import { Delete, Edit } from "@mui/icons-material";
+import EditProductModal from "./EditProductModal";
 
 const MyProduct = () => {
   const [data, setData] = useState([]);
@@ -22,6 +23,9 @@ const MyProduct = () => {
     setAlertMessage,
     setAlertSeverity,
   } = useThinkify();
+
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -105,9 +109,45 @@ const MyProduct = () => {
     }
   };
 
-  const handleEdit = (productId) => {
-    console.log(`Edit button clicked for ${productId}`);
-  };
+
+const handleEditProduct = async (productId, formData) => {
+  try {
+    setLoadingStatus(true);
+
+    const response = await axios.patch(
+      `${import.meta.env.VITE_SERVER_ENDPOINT}/products/${productId}`,
+      formData,
+      {
+        headers: {
+          Authorization: `Bearer ${Cookies.get(
+            import.meta.env.VITE_TOKEN_KEY
+          )}`,
+        },
+      }
+    );
+
+    if (response.data.status) {
+      const updatedProduct = response.data.product; // ✅ IMPORTANT
+
+      setData((prev) =>
+        prev.map((p) =>
+          p._id === updatedProduct._id ? updatedProduct : p
+        )
+      );
+
+      setAlertSeverity("success");
+      setAlertMessage(response.data.message);
+    }
+  } catch (err) {
+    console.error(err);
+    setAlertSeverity("error");
+    setAlertMessage("Update failed");
+  } finally {
+    setLoadingStatus(false);
+    setAlertBoxOpenStatus(true);
+  }
+};
+
 
   return (
     <Box
@@ -154,7 +194,10 @@ const MyProduct = () => {
                       marginRight: "5px",
                       "&:hover": { backgroundColor: "white" },
                     }}
-                    onClick={() => handleEdit(product._id)}
+                    onClick={() => {
+                      setSelectedProduct(product);
+                      setIsEditOpen(true);
+                    }}
                   >
                     <Edit />
                   </IconButton>
@@ -201,6 +244,17 @@ const MyProduct = () => {
           </Grid>
         ))}
       </Grid>
+  <EditProductModal
+  open={isEditOpen}
+  product={selectedProduct}
+  onClose={() => {
+    setIsEditOpen(false);
+    setSelectedProduct(null);
+  }}
+  onSave={handleEditProduct}
+  // onProductUpdated={handleProductUpdated}
+/>
+
     </Box>
   );
 };

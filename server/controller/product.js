@@ -96,44 +96,73 @@ const removeProduct = async (req, res) => {
 
 const editProduct = async (req, res) => {
   try {
-    const productId = req.params.productId;
+    console.log("USER:", req.user);
+    console.log("BODY:", req.body);
+    console.log("FILE:", req.file);
+
+    if (!req.user) {
+      return res.status(401).json({
+        status: false,
+        message: "Unauthorized",
+      });
+    }
+
+    const { productId } = req.params;
     const authorId = req.user._id.toString();
     const { title, price, description } = req.body;
-    let updatedData = { title, price, description };
-    const product = await ProductModel.findOne({ _id: productId, authorId });
+
+    let updatedData = {};
+    if (title) updatedData.title = title;
+    if (price !== undefined) updatedData.price = Number(price);
+    if (description) updatedData.description = description;
+
+    const product = await ProductModel.findOne({
+      _id: productId,
+      authorId,
+    });
+
     if (!product) {
-      // If a new image was uploaded, remove it since the product doesn't exist
-      if (req.file && req.file.filename) {
+      if (req.file?.filename) {
         removeUploadedFile(req.file.filename);
       }
-      return res
-        .status(404)
-        .json({ status: false, message: "Product not found" });
+      return res.status(404).json({
+        status: false,
+        message: "Product not found",
+      });
     }
-    if (req.file && req.file.filename) {
-      // Remove the old image file
-      if (product.image) {
-        removeUploadedFile(product.image);
-      }
+
+    if (req.file?.filename) {
       updatedData.image = req.file.filename;
     }
-    const updatedProduct = await ProductModel.findByIdAndUpdate(
-      productId,
+
+    const updatedProduct = await ProductModel.findOneAndUpdate(
+      { _id: productId, authorId },
       updatedData,
       { new: true }
     );
-    if (updatedProduct) {
-      return res
-        .status(200)
-        .json({ status: true, message: "Product Updated Successfully" });
-    } else {
-      return res
-        .status(500)
-        .json({ status: false, message: "Something Went Wrong" });
+
+    if (!updatedProduct) {
+      return res.status(500).json({
+        status: false,
+        message: "Update failed",
+      });
     }
+
+    if (req.file?.filename && product.image) {
+      removeUploadedFile(product.image);
+    }
+
+    return res.status(200).json({
+      status: true,
+      message: "Product Updated Successfully",
+      product: updatedProduct,
+    });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ status: false, message: "Internal Server Error" });
+    console.error("EDIT PRODUCT ERROR:", error);
+    return res.status(500).json({
+      status: false,
+      message: "Internal Server Error",
+    });
   }
 };
 

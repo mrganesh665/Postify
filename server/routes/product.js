@@ -9,6 +9,11 @@ product.post("/", userAuthentication, uploadFile.single("productimage"), addProd
 product.get("/", userAuthentication, getAllProduct);
 product.get("/:productId", getSingleProduct);
 product.delete("/:productId", userAuthentication, removeProduct);
-product.patch("/:productId", userAuthentication, editProduct);
+product.patch(
+  "/:productId",
+  userAuthentication,
+  uploadFile.single("productimage"), 
+  editProduct
+);
 
 export default product;

@@ -14,10 +14,12 @@ import Cookies from "js-cookie";
 import { Link } from "react-router-dom";
 import { Delete, Edit } from "@mui/icons-material";
 import EditProductModal from "./EditProductModal";
+import PageLoader from "../../components/common/PageLoader";
 
 const MyProduct = () => {
   const [data, setData] = useState([]);
   const {
+    loadingStatus,
     setLoadingStatus,
     setAlertBoxOpenStatus,
     setAlertMessage,
@@ -62,52 +64,31 @@ const MyProduct = () => {
     fetchData();
   }, []);
 
-  if (data.length === 0) {
-    return (
-      <Box textAlign="center" mt={5}>
-        <Typography variant="h4" color="#1b2e35">
-          No Product Available
-        </Typography>
-      </Box>
-    );
-  }
 
   const handleRemove = async (productId) => {
-    try {
-      setLoadingStatus(true);
-      const response = await axios.delete(
-        `${import.meta.env.VITE_SERVER_ENDPOINT}/products/${productId}`,
-        {
-          headers: {
-            Authorization: `Bearer ${Cookies.get(
-              import.meta.env.VITE_TOKEN_KEY
-            )}`,
-          },
-        }
-      );
-      if (response.data.status) {
-        setData(data.filter((item) => item._id !== productId));
-        setAlertBoxOpenStatus(true);
-        setAlertSeverity("success");
-        setAlertMessage(response.data.message);
-      } else {
-        setLoadingStatus(false);
-        console.log(response.data);
-        setAlertBoxOpenStatus(true);
-        setAlertSeverity("error");
-        setAlertMessage(response.data.message);
-      }
-    } catch (error) {
-      console.log(error);
-      setLoadingStatus(false);
-      setAlertBoxOpenStatus(true);
-      setAlertSeverity("error");
-      setAlertMessage("Something Went Wrong");
-      error.response.data.message
-        ? setAlertMessage(error.response.data.message)
-        : setAlertMessage(error.message);
+  try {
+    setLoadingStatus(true);
+    const response = await axios.delete(
+      `${import.meta.env.VITE_SERVER_ENDPOINT}/products/${productId}`,
+      { headers: { Authorization: `Bearer ${Cookies.get(import.meta.env.VITE_TOKEN_KEY)}` } }
+    );
+    if (response.data.status) {
+      setData((prev) => prev.filter((item) => item._id !== productId));
+      setAlertSeverity("success");
+      setAlertMessage(response.data.message);
+    } else {
+      throw new Error(response.data.message);
     }
-  };
+  } catch (error) {
+    setAlertSeverity("error");
+    setAlertMessage(
+      error.response?.data?.message || error.message
+    );
+  } finally {
+    setLoadingStatus(false);
+    setAlertBoxOpenStatus(true);
+  }
+};
 
 
 const handleEditProduct = async (productId, formData) => {
@@ -147,6 +128,17 @@ const handleEditProduct = async (productId, formData) => {
     setAlertBoxOpenStatus(true);
   }
 };
+if (loadingStatus) return <PageLoader />;
+
+if (!loadingStatus && data.length === 0) {
+  return (
+    <Box textAlign="center" mt={5}>
+      <Typography variant="h4" color="#1b2e35">
+        No Product Available
+      </Typography>
+    </Box>
+  );
+}
 
 
   return (

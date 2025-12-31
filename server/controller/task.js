@@ -55,22 +55,45 @@ const removeTask = async (req, res) => {
 }
 
 const editTask = async (req, res) => {
-    try {
+  try {
+    const authorId = req.user._id.toString();
+    const { taskId, taskStatus } = req.params;
 
-        const authorId = req.user._id.toString();
-        const { taskId, taskStatus } = req.params;
-        const updatedTask = await TaskModel.findOneAndUpdate({ authorId, _id: taskId }, { $set: { taskStatus, updatedAt: new Date(), } }, { new: true });
-        if (updatedTask.taskStatus === taskStatus) {
-            res.status(200).json({ status: true, message: "Task Status Updated Successfully" });
-        } else {
-            return res.status(500).json({ status: false, message: "Something Went Wrong" });
-        }
-
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ status: false, message: "Internal Server Error" });
+    const allowedStatus = ["todo", "ongoing", "completed"];
+    if (!allowedStatus.includes(taskStatus)) {
+      return res.status(400).json({
+        status: false,
+        message: "Invalid task status",
+      });
     }
-}
+
+    const updatedTask = await TaskModel.findOneAndUpdate(
+      { _id: taskId, authorId },
+      { taskStatus, updatedAt: new Date() },
+      { new: true }
+    );
+
+    if (!updatedTask) {
+      return res.status(404).json({
+        status: false,
+        message: "Task not found",
+      });
+    }
+
+    return res.status(200).json({
+      status: true,
+      message: "Task Status Updated Successfully",
+      task: updatedTask,
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      status: false,
+      message: "Internal Server Error",
+    });
+  }
+};
+
 
 const getAllTask = async (req, res) => {
     try {

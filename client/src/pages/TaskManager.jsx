@@ -174,6 +174,65 @@ const TaskManager = () => {
     }
   };
 
+  const getNextStatus = (currentStatus) => {
+  switch (currentStatus) {
+    case "todo":
+      return "ongoing";
+    case "ongoing":
+      return "completed";
+    default:
+      return "todo";
+  }
+};
+
+    const handleEditTask = async (taskId, currentStatus) => {
+  try {
+    const nextStatus = getNextStatus(currentStatus);
+    setLoadingStatus(true);
+
+    const response = await axios.patch(
+      `${import.meta.env.VITE_SERVER_ENDPOINT}/tasks/${taskId}/${nextStatus}`,
+      {},
+      {
+        headers: {
+          Authorization: `Bearer ${Cookies.get(
+            import.meta.env.VITE_TOKEN_KEY
+          )}`,
+        },
+      }
+    );
+
+    if (response.data.status) {
+      setAllTask((prev) =>
+        prev.map((task) =>
+          task._id === taskId
+            ? { ...task, taskStatus: nextStatus }
+            : task
+        )
+      );
+
+      setAlertSeverity("success");
+      setAlertMessage(response.data.message);
+    } else {
+      setAlertSeverity("error");
+      setAlertMessage(response.data.message);
+    }
+
+    setAlertBoxOpenStatus(true);
+  } catch (error) {
+    console.error("Edit task error:", error);
+    setAlertSeverity("error");
+    setAlertMessage(
+      error.response?.data?.message || "Something went wrong"
+    );
+    setAlertBoxOpenStatus(true);
+  } finally {
+    setLoadingStatus(false);
+  }
+};
+
+
+
   return (
     <>
       <Box sx={{ position: "relative" }}>
@@ -221,6 +280,8 @@ const TaskManager = () => {
                   text={item.title}
                   taskId={item._id}
                   handleDelete={handleDelete}
+                  handleEditTask={handleEditTask}
+                  taskStatus={item.taskStatus}
                 />
               ))}
             </List>
@@ -233,6 +294,8 @@ const TaskManager = () => {
                   text={item.title}
                   taskId={item._id}
                   handleDelete={handleDelete}
+                  handleEditTask={handleEditTask}
+                  taskStatus={item.taskStatus}
                 />
               ))}
             </List>
@@ -245,6 +308,8 @@ const TaskManager = () => {
                   text={item.title}
                   taskId={item._id}
                   handleDelete={handleDelete}
+                  handleEditTask={handleEditTask}
+                  taskStatus={item.taskStatus}
                 />
               ))}
             </List>
